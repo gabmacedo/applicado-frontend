@@ -15,29 +15,32 @@ import { useNavigate } from "react-router-dom"
 
 const CardComponent: React.FC<CardComponentProps> = ({
   type,
-  name,
+  firstName,
   lastName,
   email,
   password,
-  error,
+  errorMessage,
   loading,
-  setName,
+  setFirstName,
   setLastName,
   setEmail,
   setPassword,
-  setStep,
-  onSubmit,
+  handleRegisterSubmit,
+  handleLoginSubmit,
 }) => {
   const navigate = useNavigate()
+  const hasError = Boolean(errorMessage)
+
+  const hasMinLength = password?.length! >= 8
+  const hasLetter = /[a-zA-Z]/.test(password || "")
+  const hasNumber = /\d/.test(password || "")
+  const hasSpecial = /[^a-zA-Z0-9]/.test(password || "")
+
+  const isValid = hasMinLength && hasLetter && hasNumber && hasSpecial
 
   const handleActionClick = () => {
     if (type === "login") navigate("/auth/register")
     else navigate("/auth/login")
-  }
-
-  const handleNextStep = (e: React.FormEvent) => {
-    e.preventDefault()
-    setStep?.(2)
   }
 
   return (
@@ -62,7 +65,9 @@ const CardComponent: React.FC<CardComponentProps> = ({
         </CardAction>
       </CardHeader>
       <CardContent>
-        <form onSubmit={type === "login" ? onSubmit : handleNextStep}>
+        <form
+          onSubmit={type === "login" ? handleLoginSubmit : handleRegisterSubmit}
+        >
           <div className="flex flex-col gap-6">
             {type === "register" && (
               <>
@@ -71,8 +76,8 @@ const CardComponent: React.FC<CardComponentProps> = ({
                   <Input
                     id="name"
                     type="text"
-                    value={name}
-                    onChange={(e) => setName?.(e.target.value)}
+                    value={firstName}
+                    onChange={(e) => setFirstName?.(e.target.value)}
                     placeholder="Seu nome"
                     required
                   />
@@ -97,7 +102,7 @@ const CardComponent: React.FC<CardComponentProps> = ({
                 type="email"
                 value={email}
                 onChange={(e) => setEmail?.(e.target.value)}
-                className={error ? "border-red-500" : ""}
+                className={hasError ? "border-red-500" : ""}
                 placeholder="m@example.com"
                 required
               />
@@ -117,17 +122,27 @@ const CardComponent: React.FC<CardComponentProps> = ({
                 type="password"
                 value={password}
                 onChange={(e) => setPassword?.(e.target.value)}
-                className={error ? "border-red-500" : ""}
+                className={hasError ? "border-red-500" : ""}
                 required
               />
             </div>
+            {errorMessage && (
+              <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                {errorMessage}
+              </p>
+            )}
           </div>
+          {type === "register" ? (
+            <ul className={`mt-1 ml-1 text-[12px] text-muted-foreground`}>
+              <li>- Deve conter pelo menos 8 caracteres</li>
+              <li>- Deve conter pelo menos uma letra maiúscula</li>
+              <li>- Deve conter pelo menos um número</li>
+            </ul>
+          ) : null}
           <div className="pt-4">
             <Button
               type="submit"
-              className={
-                "h-8 w-full cursor-pointer bg-blue-600 text-white transition-colors duration-300 hover:bg-blue-700"
-              }
+              className={`h-8 w-full cursor-pointer bg-blue-600 text-white transition-colors duration-300 hover:bg-blue-700 ${loading ? "cursor-not-allowed opacity-50" : ""} ${isValid && email ? "" : "cursor-not-allowed opacity-50"}`}
               disabled={loading}
             >
               {loading ? (

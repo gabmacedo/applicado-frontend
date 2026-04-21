@@ -16,8 +16,18 @@ import {
 } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
 import type { UserResearchFormProps } from "@/types/types"
+import { Loader2Icon } from "lucide-react"
 
-export function UserResearchForm({ setStep }: UserResearchFormProps) {
+export function UserResearchForm({
+  tipoVaga,
+  quantidadeAplicacoes,
+  organizacaoCandidaturas,
+  loading,
+  setTipoVaga,
+  setQuantidadeAplicacoes,
+  setOrganizacaoCandidaturas,
+  handleFinalSubmit,
+}: UserResearchFormProps) {
   return (
     <Card className="w-full max-w-sm">
       <CardHeader>
@@ -27,41 +37,40 @@ export function UserResearchForm({ setStep }: UserResearchFormProps) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={() => setStep?.(4)}>
+        <form onSubmit={handleFinalSubmit}>
           <div className="flex flex-col gap-7">
             <div className="grid gap-2">
-              <Label htmlFor="">
-                Quais tipos de vagas você está buscando?
-              </Label>
-              <Select>
+              <Label htmlFor="">Quais tipos de vagas você está buscando?</Label>
+              <Select value={tipoVaga} onValueChange={setTipoVaga}>
                 <SelectTrigger className="w-full max-w-48">
                   <SelectValue placeholder="Escolha uma opção" />
                 </SelectTrigger>
                 <SelectContent position="popper">
                   <SelectGroup>
-                    <SelectItem value="estagio">Estágio</SelectItem>
-                    <SelectItem value="junior">Junior</SelectItem>
-                    <SelectItem value="pleno">Pleno</SelectItem>
-                    <SelectItem value="senior">Sênior</SelectItem>
-                    <SelectItem value="outros">Outros</SelectItem>
+                    <SelectItem value="ESTAGIO">Estágio</SelectItem>
+                    <SelectItem value="JUNIOR">Junior</SelectItem>
+                    <SelectItem value="PLENO">Pleno</SelectItem>
+                    <SelectItem value="SENIOR">Sênior</SelectItem>
+                    <SelectItem value="OUTROS">Outros</SelectItem>
                   </SelectGroup>
                 </SelectContent>
               </Select>
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="">
-                Quantas aplicações você faz por dia?
-              </Label>
-              <Select>
+              <Label htmlFor="">Quantas aplicações você faz por dia?</Label>
+              <Select
+                value={quantidadeAplicacoes}
+                onValueChange={setQuantidadeAplicacoes}
+              >
                 <SelectTrigger className="w-full max-w-48">
                   <SelectValue placeholder="Escolha uma opção" />
                 </SelectTrigger>
                 <SelectContent position="popper">
                   <SelectGroup>
-                    <SelectItem value="min">Entre 1-5</SelectItem>
-                    <SelectItem value="med">Entre 6-10</SelectItem>
-                    <SelectItem value="max">Entre 11-15</SelectItem>
-                    <SelectItem value="plus">Mais de 15</SelectItem>
+                    <SelectItem value="MIN">Entre 1-5</SelectItem>
+                    <SelectItem value="MED">Entre 6-10</SelectItem>
+                    <SelectItem value="MAX">Entre 11-15</SelectItem>
+                    <SelectItem value="PLUS">Mais de 15</SelectItem>
                   </SelectGroup>
                 </SelectContent>
               </Select>
@@ -70,23 +79,40 @@ export function UserResearchForm({ setStep }: UserResearchFormProps) {
               <Label htmlFor="">
                 Como você organiza suas candidaturas atualmente?
               </Label>
-              <Select>
+              <Select
+                value={organizacaoCandidaturas}
+                onValueChange={setOrganizacaoCandidaturas}
+              >
                 <SelectTrigger className="w-full max-w-48">
                   <SelectValue placeholder="Escolha uma opção" />
                 </SelectTrigger>
                 <SelectContent position="popper">
                   <SelectGroup>
-                    <SelectItem value="nao">Não organizo</SelectItem>
-                    <SelectItem value="manual">Organizo de forma manual</SelectItem>
-                    <SelectItem value="ferramentas">Utilizo ferramentas semelhantes</SelectItem>
+                    <SelectItem value="NAO">Não organizo</SelectItem>
+                    <SelectItem value="MANUAL">
+                      Organizo de forma manual
+                    </SelectItem>
+                    <SelectItem value="FERRAMENTAS">
+                      Utilizo ferramentas semelhantes
+                    </SelectItem>
                   </SelectGroup>
                 </SelectContent>
               </Select>
             </div>
           </div>
           <div className="pt-4">
-            <Button type="submit" className="h-8 w-full cursor-pointer">
-              Finalizar cadastro
+            <Button
+              type="submit"
+              className={`h-8 w-full cursor-pointer bg-blue-600 text-white transition-colors duration-300 hover:bg-blue-700 ${!tipoVaga || !quantidadeAplicacoes || !organizacaoCandidaturas ? "cursor-not-allowed opacity-50" : ""}`}
+              disabled={
+                !tipoVaga || !quantidadeAplicacoes || !organizacaoCandidaturas
+              }
+            >
+              {loading ? (
+                <Loader2Icon className="h-4 w-4 animate-spin" />
+              ) : (
+                "Finalizar cadastro"
+              )}
             </Button>
           </div>
         </form>

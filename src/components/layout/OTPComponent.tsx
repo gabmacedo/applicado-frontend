@@ -1,4 +1,4 @@
-import { RefreshCwIcon } from "lucide-react"
+import { Loader2Icon, RefreshCwIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -9,11 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import {
-  Field,
-  FieldDescription,
-  FieldLabel,
-} from "@/components/ui/field"
+import { Field, FieldDescription, FieldLabel } from "@/components/ui/field"
 import {
   InputOTP,
   InputOTPGroup,
@@ -21,15 +17,24 @@ import {
 } from "@/components/ui/input-otp"
 import type { InputOTPFormProps } from "@/types/types"
 
+export function InputOTPForm({
+  email,
+  code,
+  loading,
+  errorMessage,
+  setStep,
+  setCode,
+  handleOTPSubmit,
+}: InputOTPFormProps) {
+  const hasError = Boolean(errorMessage)
 
-export function InputOTPForm({ setStep }: InputOTPFormProps) {
   return (
-    <Card className="mx-auto w-96">
+    <Card className="mx-auto w-full max-w-96">
       <CardHeader>
         <CardTitle>Verifique seu email</CardTitle>
         <CardDescription>
           Informe o código de verificação que enviamos para o email:{" "}
-          <span className="font-medium">m@example.com</span>.
+          <span className="font-medium">{email}</span>.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -43,14 +48,20 @@ export function InputOTPForm({ setStep }: InputOTPFormProps) {
               Reenviar código
             </Button>
           </div>
-          <InputOTP maxLength={6} id="otp-verification" required>
-            <InputOTPGroup className="*:data-[slot=input-otp-slot]:h-12 *:data-[slot=input-otp-slot]:w-11 *:data-[slot=input-otp-slot]:text-xl">
-              <InputOTPSlot index={0} />
-              <InputOTPSlot index={1} />
-              <InputOTPSlot index={2} />
-              <InputOTPSlot index={3} />
-              <InputOTPSlot index={4} />
-              <InputOTPSlot index={5} />
+          <InputOTP
+            maxLength={6}
+            id="otp-verification"
+            className={`w-full ${hasError ? "border-red-500" : ""}`}
+            onChange={(value) => setCode?.(value)}
+            required
+          >
+            <InputOTPGroup className="grid w-full grid-cols-6">
+              <InputOTPSlot index={0} className="h-14 w-full text-xl" />
+              <InputOTPSlot index={1} className="h-14 w-full text-xl" />
+              <InputOTPSlot index={2} className="h-14 w-full text-xl" />
+              <InputOTPSlot index={3} className="h-14 w-full text-xl" />
+              <InputOTPSlot index={4} className="h-14 w-full text-xl" />
+              <InputOTPSlot index={5} className="h-14 w-full text-xl" />
             </InputOTPGroup>
           </InputOTP>
           <FieldDescription>
@@ -60,8 +71,16 @@ export function InputOTPForm({ setStep }: InputOTPFormProps) {
       </CardContent>
       <CardFooter>
         <Field>
-          <Button type="submit" className="w-full h-8" onClick={() => setStep?.(3)}>
-            Enviar
+          <Button
+            type="submit"
+            className={`h-8 w-full ${code?.length === 6 ? "" : "cursor-not-allowed opacity-50"}`}
+            onClick={handleOTPSubmit}
+          >
+            {loading ? (
+              <Loader2Icon className="h-4 w-4 animate-spin" />
+            ) : (
+              "Verificar"
+            )}
           </Button>
         </Field>
       </CardFooter>
