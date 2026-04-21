@@ -3,17 +3,150 @@ import CardComponent from "../../components/layout/CardComponent"
 import { useState } from "react"
 import { InputOTPForm } from "@/components/layout/OTPComponent"
 import { UserResearchForm } from "@/components/layout/UserResearchForm"
+import { useNavigate } from "react-router-dom"
 
 const RegisterPage: React.FC = () => {
-  const [name, setName] = useState("")
+  const navigate = useNavigate()
+  const [firstName, setFirstName] = useState("")
   const [lastName, setLastName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [step, setStep] = useState(1)
+  const [code, setCode] = useState("")
 
-  const handleRegisterSubmit = (e: React.FormEvent) => {
+  // User research form states
+  const [tipoVaga, setTipoVaga] = useState("")
+  const [quantidadeAplicacoes, setQuantidadeAplicacoes] = useState("")
+  const [organizacaoCandidaturas, setOrganizacaoCandidaturas] = useState("")
+
+  const [step, setStep] = useState(1)
+  const [error, setError] = useState("")
+  const [loading, setLoading] = useState(false)
+
+  const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setStep(2)
+    setError("")
+    setLoading(true)
+
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/auth/send-otp`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email }),
+        }
+      )
+
+      if (!response.ok) {
+        let apiMessage = "Falha ao enviar o código de verificação."
+
+        try {
+          const responseData = await response.json()
+          if (responseData?.error) {
+            apiMessage = responseData.error
+          }
+        } catch {}
+
+        setError(apiMessage)
+        return
+      }
+
+      setStep(2)
+    } catch {
+      setError("Não foi possível conectar com o servidor. Tente novamente.")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleOTPSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError("")
+    setLoading(true)
+
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/auth/verify-otp`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, code }),
+        }
+      )
+
+      if (!response.ok) {
+        let apiMessage = "Código de verificação inválido."
+
+        try {
+          const responseData = await response.json()
+          if (responseData?.error) {
+            apiMessage = responseData.error
+          }
+        } catch {}
+
+        setError(apiMessage)
+        return
+      }
+
+      setStep(3)
+    } catch (error) {
+      setError("Não foi possível conectar com o servidor. Tente novamente.")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleFinalSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError("")
+    setLoading(true)
+
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/auth/register`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            firstName: firstName.trim(),
+            lastName: lastName.trim(),
+            email: email.trim(),
+            password: password.trim(),
+            tipoVaga,
+            quantidadeAplicacoes,
+            organizacaoCandidaturas,
+          }),
+        }
+      )
+
+      if (!response.ok) {
+        let apiMessage = "Não foi possível concluir o cadastro."
+
+        try {
+          const responseData = await response.json()
+          if (responseData?.error) {
+            apiMessage = responseData.error
+          }
+        } catch {}
+
+        setError(apiMessage)
+        return
+      }
+
+      navigate("/dashboard")
+
+      // Handle successful registration
+    } catch (error) {
+      setError("Não foi possível conectar com o servidor. Tente novamente.")
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -34,21 +167,44 @@ const RegisterPage: React.FC = () => {
             {step === 1 && (
               <CardComponent
                 type="register"
-                name={name}
+                firstName={firstName}
                 lastName={lastName}
                 email={email}
                 password={password}
-                setName={setName}
+                errorMessage={error}
+                loading={loading}
+                setFirstName={setFirstName}
                 setLastName={setLastName}
                 setEmail={setEmail}
                 setPassword={setPassword}
+                handleRegisterSubmit={handleRegisterSubmit}
+              />
+            )}
+
+            {step === 2 && (
+              <InputOTPForm
+                email={email}
+                code={code}
+                loading={loading}
+                errorMessage={error}
+                setCode={setCode}
+                handleOTPSubmit={handleOTPSubmit}
                 setStep={setStep}
               />
             )}
 
-            {step === 2 && <InputOTPForm setStep={setStep} />}
-
-            {step === 3 && <UserResearchForm setStep={setStep} />}
+            {step === 3 && (
+              <UserResearchForm
+                tipoVaga={tipoVaga}
+                quantidadeAplicacoes={quantidadeAplicacoes}
+                organizacaoCandidaturas={organizacaoCandidaturas}
+                loading={loading}
+                setTipoVaga={setTipoVaga}
+                setQuantidadeAplicacoes={setQuantidadeAplicacoes}
+                setOrganizacaoCandidaturas={setOrganizacaoCandidaturas}
+                handleFinalSubmit={handleFinalSubmit}
+              />
+            )}
           </div>
         </div>
       </main>

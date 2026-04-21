@@ -10,7 +10,7 @@ const LoginPage: React.FC = () => {
   const [error, setError] = useState(false)
   const [loading, setLoading] = useState(false)
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
 
@@ -22,7 +22,7 @@ const LoginPage: React.FC = () => {
 
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_BASE_URL}/api/auth/login`,
+        `${import.meta.env.VITE_API_URL}/auth/login`,
         {
           method: "POST",
           headers: {
@@ -73,7 +73,7 @@ const LoginPage: React.FC = () => {
               setEmail={setEmail}
               setPassword={setPassword}
               error={error}
-              onSubmit={handleLogin}
+              handleLoginSubmit={handleLoginSubmit}
             />
           </div>
         </div>
